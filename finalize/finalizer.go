@@ -31,9 +31,7 @@ type Finalizer struct {
 
 // NewFinalizer construct a new finalizer
 func NewFinalizer(name string, client client.Client) *Finalizer {
-	return &Finalizer{
-		client: client,
-	}
+	return &Finalizer{name: name, client: client}
 }
 
 // Finalize performs object finalization.
