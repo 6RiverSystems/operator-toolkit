@@ -20,7 +20,9 @@ type Finalized interface {
 
 // Result is finalization result
 type Result struct {
-	IsFinalized bool // is set to true if finalization completes
+	IsInitialized bool // is set to true if missing finalizer is added to resource
+	IsFinalized   bool // is set to true if finalization completes
+
 }
 
 // Finalizer is a controller to handle CR finalization process
@@ -66,6 +68,7 @@ func (f *Finalizer) Finalize(reqLogger logr.Logger, m Finalized, clean func() er
 		if err := f.addFinalizer(reqLogger, m); err != nil {
 			return Result{}, err
 		}
+		return Result{IsInitialized: true}, nil
 	}
 	return Result{}, nil
 }
