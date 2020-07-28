@@ -68,9 +68,9 @@ func (r *Reconciler) loggerFor(obj Resource) logr.Logger {
 func (r *Reconciler) CreateResourceIfNotExists(ctx context.Context, owner, obj Resource) error {
 	if owner != nil {
 		_ = controllerutil.SetControllerReference(owner, obj, r.GetScheme())
-	}
-	if obj.GetNamespace() == "" {
-		obj.SetNamespace(owner.GetNamespace())
+		if obj.GetNamespace() == "" {
+			obj.SetNamespace(owner.GetNamespace())
+		}
 	}
 
 	log := r.loggerFor(obj)
@@ -92,9 +92,9 @@ func (r *Reconciler) CreateResourceIfNotExists(ctx context.Context, owner, obj R
 func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Resource) error {
 	if owner != nil {
 		_ = controllerutil.SetControllerReference(owner, obj, r.GetScheme())
-	}
-	if obj.GetNamespace() == "" {
-		obj.SetNamespace(owner.GetNamespace())
+		if obj.GetNamespace() == "" {
+			obj.SetNamespace(owner.GetNamespace())
+		}
 	}
 
 	log := r.loggerFor(obj)
@@ -139,9 +139,9 @@ func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Reso
 func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resource, fpatch func(runtime.Object) error) error {
 	if owner != nil {
 		_ = controllerutil.SetControllerReference(owner, obj, r.GetScheme())
-	}
-	if obj.GetNamespace() == "" {
-		obj.SetNamespace(owner.GetNamespace())
+		if obj.GetNamespace() == "" {
+			obj.SetNamespace(owner.GetNamespace())
+		}
 	}
 
 	found := obj.DeepCopyObject().(Resource)
