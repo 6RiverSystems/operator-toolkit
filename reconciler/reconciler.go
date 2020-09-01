@@ -136,7 +136,7 @@ func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Reso
 // CreateOrPatchResource creates a resource if it doesn't exist, and patches, if it exist
 // if owner is not nil, the owner field os se
 // if obj namespace is "", the namespace field of the owner is assigned
-func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resource, fpatch func(runtime.Object) error) error {
+func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resource, fpatch func(objFound, objNew runtime.Object) error) error {
 	if owner != nil {
 		_ = controllerutil.SetControllerReference(owner, obj, r.GetScheme())
 		if obj.GetNamespace() == "" {
@@ -166,7 +166,7 @@ func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resou
 		log := r.loggerFor(found)
 
 		patch := client.MergeFrom(found.DeepCopyObject())
-		if err := fpatch(found); err != nil {
+		if err := fpatch(found, obj); err != nil {
 			log.Error(err, "failed to modify object")
 			return err
 		}
