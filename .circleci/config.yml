@@ -1,0 +1,24 @@
+# -*- yaml -*-
+version: 2.1
+orbs:
+  go-module: timakin/go-module@0.3.0
+  sixrs-gke: sixriversystems/sixrs-gke@2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.15
+    steps:
+      - checkout
+      - run:
+          name: Fix Path
+          command: export PATH=$PATH:$GOROOT/bin
+      - run:
+          name: staticcheck
+          command: go get honnef.co/go/tools/cmd/staticcheck
+      - run:
+          name: golint
+          command: go get golang.org/x/lint/golint
+      - run: go get -v -d ./...
+      - run: staticcheck ./...
+      - sixrs-gke/run-release
