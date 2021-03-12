@@ -8,6 +8,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	//Reasons for deployment conditions
+	//
+	//Status Available:
+
+	// MinimumReplicasAvailable is added in a deployment when it has its minimum replicas required available.
+	MinimumReplicasAvailable = "MinimumReplicasAvailable"
+	// MinimumReplicasUnavailable is added in a deployment when it doesn't have the minimum required replicas
+	// available.
+	MinimumReplicasUnavailable = "MinimumReplicasUnavailable"
+)
+
 // ConditionType is the type of the condition and is typically a CamelCased
 // word or short phrase.
 //
@@ -47,6 +59,12 @@ func (c Condition) IsTrue() bool {
 // IsFalse returns whether the condition status is "False".
 func (c Condition) IsFalse() bool {
 	return c.Status == corev1.ConditionFalse
+}
+
+// MatchesReason returns whether the condition Reason matches the CamelCase
+// one-word representation of cause of current status
+func (c Condition) MatchesReason(rsn ConditionReason) bool {
+	return c.Reason == rsn
 }
 
 // IsUnknown returns whether the condition status is "Unknown".
