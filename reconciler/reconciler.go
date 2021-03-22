@@ -238,13 +238,11 @@ func (r *Reconciler) ManageError(ctx context.Context, obj Resource, err error) (
 	log := r.loggerFor(obj)
 
 	statusChanged := false
-	isConditionErr := false
-	var conditionErr *ConditionError
 
 	// set condition if the error is of ConditionError type
 	if conditionsStatusAware, ok := obj.(conditionsStatusAware); ok {
-		isConditionErr = errors.As(err, &conditionErr)
-		if isConditionErr {
+		var conditionErr *ConditionError
+		if errors.As(err, &conditionErr) {
 			c := conditionErr.Condition()
 			log.V(1).Info("Setting status condition", "Condition", c)
 			statusChanged = conditionsStatusAware.SetCondition(c)
@@ -265,17 +263,6 @@ func (r *Reconciler) ManageError(ctx context.Context, obj Resource, err error) (
 			log.Error(err, "Unable to update status")
 			return reconcile.Result{RequeueAfter: time.Second}, nil
 		}
-	}
-
-	// For benign errors we log the error and requeue but return error as nil
-	// to prevent incrementing error metrics
-	if isConditionErr {
-		c := conditionErr.Condition()
-		if c.MatchesReason(apis.MinimumReplicasUnavailable) {
-			log.Error(conditionErr.Err, "Treating as retriable benign error")
-			return reconcile.Result{Requeue: true}, nil
-		}
-
 	}
 
 	// For not retriable errors set RequeueAfter to 6 hours (avg time of Event lifetime)
