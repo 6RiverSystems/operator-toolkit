@@ -91,11 +91,6 @@ func (r *Reconciler) CreateResourceIfNotExists(ctx context.Context, owner, obj R
 // if owner is not nil, the owner field os set
 // if obj namespace is "", the namespace field of the owner is assigned
 func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Resource) error {
-	anno := obj.GetAnnotations()
-	if val := anno["control-tower/do-not-reconcile"]; val == "true" {
-		return nil
-	}
-
 	if owner != nil {
 		_ = controllerutil.SetControllerReference(owner, obj, r.GetScheme())
 		if obj.GetNamespace() == "" {
@@ -121,6 +116,10 @@ func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Reso
 		}
 		return nil
 	}
+	anno := obj.GetAnnotations()
+	if val := anno["control-tower/do-not-reconcile"]; val == "true" {
+		return nil
+	}
 	if err == nil {
 		obj3, ok := obj2.(metav1.Object)
 		if !ok {
@@ -143,17 +142,6 @@ func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Reso
 // if owner is not nil, the owner field os se
 // if obj namespace is "", the namespace field of the owner is assigned
 func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resource, fpatch func(objFound, objNew runtime.Object) error) error {
-	anno := obj.GetAnnotations()
-
-	log := r.loggerFor(obj)
-	for k, v := range anno {
-		log.Info("annotation ", k, v)
-	}
-
-	if val := anno["control-tower/do-not-reconcile"]; val == "true" {
-		return nil
-	}
-
 	if owner != nil {
 		_ = controllerutil.SetControllerReference(owner, obj, r.GetScheme())
 		if obj.GetNamespace() == "" {
@@ -182,6 +170,10 @@ func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resou
 	if err == nil {
 		log := r.loggerFor(found)
 
+		anno := obj.GetAnnotations()
+		if val := anno["control-tower/do-not-reconcile"]; val == "true" {
+			return nil
+		}
 
 		patch := client.MergeFrom(found.DeepCopyObject())
 		if err := fpatch(found, obj); err != nil {
