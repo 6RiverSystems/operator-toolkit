@@ -144,6 +144,12 @@ func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Reso
 // if obj namespace is "", the namespace field of the owner is assigned
 func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resource, fpatch func(objFound, objNew runtime.Object) error) error {
 	anno := obj.GetAnnotations()
+
+	log := r.loggerFor(obj)
+	for k, v := range anno {
+		log.Info("annotation ", k, v)
+	}
+
 	if val := anno["control-tower/do-not-reconcile"]; val == "true" {
 		return nil
 	}
@@ -175,6 +181,7 @@ func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resou
 
 	if err == nil {
 		log := r.loggerFor(found)
+
 
 		patch := client.MergeFrom(found.DeepCopyObject())
 		if err := fpatch(found, obj); err != nil {
