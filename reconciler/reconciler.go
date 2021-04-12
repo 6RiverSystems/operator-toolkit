@@ -6,7 +6,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/6RiverSystems/operator-toolkit/apis"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -19,6 +18,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/6RiverSystems/operator-toolkit/apis"
 )
 
 // Reconciler incapsulates a bunch of helpful methods usually required by custom resource reconciler
@@ -95,6 +96,11 @@ func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Reso
 		if obj.GetNamespace() == "" {
 			obj.SetNamespace(owner.GetNamespace())
 		}
+	}
+
+	anno := obj.GetAnnotations()
+	if val := anno["control-tower/do-not-reconcile"]; val == "true" {
+		return nil
 	}
 
 	log := r.loggerFor(obj)
