@@ -6,7 +6,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/6RiverSystems/operator-toolkit/apis"
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -19,6 +18,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/6RiverSystems/operator-toolkit/apis"
 )
 
 // Reconciler incapsulates a bunch of helpful methods usually required by custom resource reconciler
@@ -115,6 +116,10 @@ func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Reso
 		}
 		return nil
 	}
+	res2 := obj2.(Resource)
+	if res2.GetAnnotations()["control-tower/do-not-reconcile"] == "true" {
+			return nil
+	}
 	if err == nil {
 		obj3, ok := obj2.(metav1.Object)
 		if !ok {
@@ -159,6 +164,10 @@ func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resou
 			log.Error(err, "unable to create object")
 			return err
 		}
+		return nil
+	}
+
+	if found.GetAnnotations()["control-tower/do-not-reconcile"] == "true" {
 		return nil
 	}
 
