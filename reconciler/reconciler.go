@@ -116,9 +116,9 @@ func (r *Reconciler) CreateOrUpdateResource(ctx context.Context, owner, obj Reso
 		}
 		return nil
 	}
-	anno := obj.GetAnnotations()
-	if val := anno["control-tower/do-not-reconcile"]; val == "true" {
-		return nil
+	res2 := obj2.(Resource)
+	if res2.GetAnnotations()["control-tower/do-not-reconcile"] == "true" {
+			return nil
 	}
 	if err == nil {
 		obj3, ok := obj2.(metav1.Object)
@@ -167,13 +167,12 @@ func (r *Reconciler) CreateOrPatchResource(ctx context.Context, owner, obj Resou
 		return nil
 	}
 
+	if found.GetAnnotations()["control-tower/do-not-reconcile"] == "true" {
+		return nil
+	}
+
 	if err == nil {
 		log := r.loggerFor(found)
-
-		anno := obj.GetAnnotations()
-		if val := anno["control-tower/do-not-reconcile"]; val == "true" {
-			return nil
-		}
 
 		patch := client.MergeFrom(found.DeepCopyObject())
 		if err := fpatch(found, obj); err != nil {
